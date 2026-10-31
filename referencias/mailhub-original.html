@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0c0813"><meta name="description" content="Seu correio, sua bagunça. O caos agora tem caixa de entrada.">
+  <title>MAILHUB // CORREIO DO CAOS</title>
+  <link rel="icon" href="./icon.svg?v=caos2" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=mailbox3">
+  <script src="./app.js?v=mailbox3" defer></script>
+</head>
+<body>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <div id="boot-screen" class="login-screen" role="status">// CONECTANDO AO CORREIO DO CAOS…</div>
+  <main id="login-screen" class="login-screen" hidden>
+    <section class="login-card">
+      <span class="brand-mark" aria-hidden="true">m<span>·</span></span>
+      <div class="eyebrow">SEU E-MAIL. SEUS DOMÍNIOS.</div>
+      <h1>Uma caixa.<br>Todos os seus endereços.</h1>
+      <p class="muted">Crie endereços em segundos e cuide das suas conversas em um só lugar.</p>
+      <form id="login-form">
+        <label for="password">Senha do painel</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Sua senha de acesso">
+        <p id="login-error" class="error" role="alert"></p>
+        <button class="primary" type="submit">Entrar no MailHub <span aria-hidden="true">→</span></button>
+      </form>
+      <div class="login-footer"><span class="live-dot"></span> Privado por padrão <span>·</span> Node.js + SQLite</div>
+    </section>
+    <aside class="login-aside" aria-hidden="true"><div class="orbit">@</div><p>Menos configuração.<br>Mais conversas.</p></aside>
+  </main>
+  <div id="app" class="app" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="MailHub início"><span class="brand-mark small">m<span>·</span></span>mailhub<span class="brand-tag">PESSOAL</span></a>
+      <button id="compose-button" class="primary compose-button"><span aria-hidden="true">＋</span> Escrever e-mail</button>
+      <nav aria-label="Pastas">
+        <button class="nav-item selected" data-folder="inbox"><span aria-hidden="true">▣</span> Caixa de entrada <b id="unread-count">0</b></button>
+        <button class="nav-item" data-folder="sent"><span aria-hidden="true">↗</span> Enviados</button>
+        <button class="nav-item" data-folder="starred"><span aria-hidden="true">☆</span> Favoritos</button>
+        <button class="nav-item" data-folder="trash"><span aria-hidden="true">♧</span> Lixeira</button>
+      </nav>
+      <div class="section-label">SEUS ENDEREÇOS <button id="new-mailbox" class="icon-button" aria-label="Criar endereços">＋</button></div>
+      <button id="all-mailboxes" class="mailbox-button chosen">Todos os endereços <span id="mailbox-count">0</span></button>
+      <div id="mailbox-list" class="mailbox-list"></div>
+      <button id="manage-button" class="manage-button">Gerenciar endereços <span aria-hidden="true">↗</span></button>
+      <footer class="sidebar-footer"><div class="avatar">EU</div><div><strong>Meu espaço</strong><small>Painel privado</small></div><button id="logout" class="icon-button" aria-label="Sair do painel">↪</button></footer>
+    </aside>
+    <main class="workspace">
+      <header class="topbar"><div><span class="breadcrumb">Meu espaço</span><span class="slash">/</span><span id="folder-breadcrumb">Caixa de entrada</span></div><span class="cloud-badge"><span class="live-dot"></span> Node.js · SQLite</span></header>
+      <div id="sending-notice" class="sending-notice" hidden><span aria-hidden="true">ⓘ</span><span>Para enviar e responder, configure um <strong>provedor SMTP autorizado para seus domínios</strong>.</span><a href="https://nodemailer.com/smtp" target="_blank" rel="noreferrer">Ver detalhes ↗</a></div>
+      <section class="inbox-header"><div><div class="eyebrow">TUDO NO SEU LUGAR</div><h1 id="folder-title">Caixa de entrada<span class="title-dot">.</span></h1><p id="folder-subtitle" class="muted">Suas conversas, em todos os seus domínios.</p></div><button id="create-top" class="secondary">＋ Criar endereço</button></section>
+      <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar por assunto ou endereço" aria-label="Buscar mensagens"></label><button id="refresh" class="secondary" aria-label="Atualizar mensagens">↻ <span>Atualizar</span></button><span id="last-updated" class="last-updated"></span></div>
+      <div class="mail-area"><section class="message-column" aria-label="Lista de mensagens"><div class="list-caption"><span id="list-label">MENSAGENS</span><span id="message-count">0</span></div><div id="messages" class="messages"></div><button id="load-more" class="load-more" hidden>Carregar mais mensagens</button></section><section id="reader" class="reader" aria-label="Leitura de mensagem"></section></div>
+      <footer class="workspace-footer"><span><span class="live-dot"></span> Seu correio privado. O caos tem endereço.</span><span>Atualização automática a cada 3 s</span></footer>
+    </main>
+  </div>
+  <dialog id="mailbox-dialog"><form id="mailbox-form"><div class="dialog-top"><div><div class="eyebrow">UM NOVO ENDEREÇO</div><h2>Crie. Copie. Use.</h2></div><button type="button" class="icon-button close-dialog" aria-label="Fechar">×</button></div><p class="muted">Escolha um domínio e crie um ou vários endereços de uma vez.</p><label for="box-domain">Domínio</label><select id="box-domain" required></select><div class="form-row"><div><label for="box-name">Nome <span class="optional">opcional</span></label><input id="box-name" placeholder="contato, suporte, seu nome…" maxlength="64" autocomplete="off"></div><div class="quantity"><label for="box-count">Quantidade</label><input id="box-count" type="number" min="1" max="50" value="1" required></div></div><p class="field-hint">Deixe o nome vazio para gerar um endereço aleatório. Em lote, adicionamos um código único ao nome.</p><label for="box-label">Identificação <span class="optional">opcional</span></label><input id="box-label" maxlength="80" placeholder="Pessoal, trabalho, cadastros…"><label for="box-expiry">Validade</label><select id="box-expiry"><option value="0">Sem expiração</option><option value="24">24 horas</option><option value="168">7 dias</option><option value="720">30 dias</option></select><p id="mailbox-error" class="error" role="alert"></p><div id="created-addresses" class="created-addresses" hidden><strong>Seus novos endereços</strong><pre id="created-list"></pre><button id="copy-created" type="button" class="secondary">Copiar todos</button></div><button type="submit" class="primary full">Criar endereços <span aria-hidden="true">→</span></button></form></dialog>
+  <dialog id="compose-dialog" class="compose-dialog"><form id="compose-form"><div class="dialog-top"><div><div class="eyebrow">UMA NOVA CONVERSA</div><h2 id="compose-title">Escrever e-mail</h2></div><button type="button" class="icon-button close-dialog" aria-label="Fechar">×</button></div><label for="compose-from">De</label><select id="compose-from" required></select><label for="compose-to">Para</label><input id="compose-to" type="email" required placeholder="pessoa@exemplo.com" autocomplete="off"><label for="compose-subject">Assunto</label><input id="compose-subject" required maxlength="300" placeholder="Sobre o que vamos conversar?"><label for="compose-body">Mensagem</label><textarea id="compose-body" required maxlength="120000" rows="9" placeholder="Escreva sua mensagem…"></textarea><p class="field-hint"><label for="compose-attachments">Anexos</label><input id="compose-attachments" type="file" multiple><span>Até 10 arquivos, somando 1 MiB. Recebimento: mensagem completa até 2 MiB.</span></p><p id="compose-error" class="error" role="alert"></p><div class="compose-footer"><span>Enviado pelo seu provedor</span><button id="send-button" class="primary" type="submit">Enviar e-mail ↗</button></div></form></dialog>
+  <dialog id="manage-dialog" class="manage-dialog"><div class="dialog-top"><div><div class="eyebrow">SEUS ENDEREÇOS</div><h2>O caos tem prazo. Você decide.</h2></div><button type="button" class="icon-button close-dialog" aria-label="Fechar">×</button></div><p class="muted">Pause, ajuste a validade ou exclua um endereço. Suas conversas continuam guardadas.</p><div id="manage-list"></div></dialog>
+  <dialog id="expiry-dialog" aria-labelledby="expiry-title"><div class="dialog-top"><div><div class="eyebrow">CONTROLE DO TEMPO</div><h2 id="expiry-title">Mais tempo para o caos.</h2></div><button type="button" class="icon-button close-dialog" aria-label="Fechar">×</button></div><p id="expiry-address" class="managed-address"></p><div id="expiry-counter" class="expiry-counter"></div><section class="expiry-section"><h3>Ganhar tempo</h3><p class="muted">Acrescenta ao prazo atual. Se já expirou, conta a partir de agora.</p><div class="expiry-shortcuts"><button type="button" class="secondary" data-extend-hours="24">+1 dia</button><button type="button" class="secondary" data-extend-hours="168">+7 dias</button><button type="button" class="secondary" data-extend-hours="720">+30 dias</button></div><div class="expiry-custom"><label for="extend-days">Adicionar dias</label><input id="extend-days" type="number" min="1" max="365" step="1" value="7"><button id="extend-custom" type="button" class="secondary">Acrescentar</button></div></section><form id="expiry-form" class="expiry-section"><h3>Definir outra validade</h3><label for="expiry-value">Novo prazo a partir de agora</label><select id="expiry-value"><option value="24">24 horas</option><option value="168">7 dias</option><option value="720">30 dias</option><option value="0">Sem expiração</option></select><button type="submit" class="primary">Aplicar validade →</button></form><p id="expiry-error" class="error" role="alert"></p></dialog>
+  <dialog id="remove-dialog" aria-labelledby="remove-title"><div class="dialog-top"><div><div class="eyebrow">CONFIRMAR EXCLUSÃO</div><h2 id="remove-title">Tirar este endereço do caos?</h2></div><button type="button" class="icon-button close-dialog" aria-label="Fechar">×</button></div><p id="remove-address" class="managed-address"></p><p class="muted">O endereço sai da lista e para de receber e enviar. As mensagens e os anexos continuam em “Todos os endereços”. Você pode criar o mesmo endereço novamente para voltar a usá-lo.</p><form id="remove-form"><p id="remove-error" class="error" role="alert"></p><div class="confirm-actions"><button type="button" class="secondary close-dialog">Cancelar</button><button id="remove-confirm" type="submit" class="secondary danger">Sim, excluir endereço</button></div></form></dialog>
+</body></html>
